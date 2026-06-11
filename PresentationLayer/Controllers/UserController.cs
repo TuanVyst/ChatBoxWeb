@@ -39,16 +39,16 @@ namespace PresentationLayer.Controllers
         }
 
         /// <summary>
-        /// Tạo user mới
+        /// Đăng nhập hoặc tạo mới user
         /// </summary>
-        [HttpPost]
-        public async Task<IActionResult> CreateUser([FromBody] CreateUserDto dto)
+        [HttpPost("login")]
+        public async Task<IActionResult> Login([FromBody] CreateUserDto dto)
         {
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
-            var user = await _userService.CreateUserAsync(dto.Username);
-            return CreatedAtAction(nameof(GetUserById), new { id = user.Id }, user);
+            var user = await _userService.LoginAsync(dto.Username);
+            return Ok(user);
         }
 
         /// <summary>

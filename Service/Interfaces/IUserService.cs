@@ -7,7 +7,7 @@ namespace Service.Interfaces
     {
         Task<IEnumerable<UserResponseDto>> GetAllUsersAsync();
         Task<UserResponseDto?> GetUserByIdAsync(string id);
-        Task<UserResponseDto> CreateUserAsync(string username);
+        Task<UserResponseDto> LoginAsync(string username);
         Task<bool> DeleteUserAsync(string id);
     }
 }

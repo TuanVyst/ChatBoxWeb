@@ -26,8 +26,14 @@ namespace Service.Implements
             return user == null ? null : MapToDto(user);
         }
 
-        public async Task<UserResponseDto> CreateUserAsync(string username)
+        public async Task<UserResponseDto> LoginAsync(string username)
         {
+            var existingUser = await _userRepo.GetUserByUsernameAsync(username);
+            if (existingUser != null)
+            {
+                return MapToDto(existingUser);
+            }
+
             var user = new User
             {
                 Username = username

@@ -6,6 +6,7 @@ namespace Repository.Interfaces
     {
         Task<IEnumerable<User>> GetAllUsersAsync();
         Task<User?> GetUserByIdAsync(string id);
+        Task<User?> GetUserByUsernameAsync(string username);
         Task<User> AddUserAsync(User user);
         Task<bool> DeleteUserAsync(string id);
     }
