@@ -5,6 +5,9 @@ namespace BusinessObject.Dtos
 {
     public class SendMessageDto
     {
+        /// <summary>
+        /// ID người gửi (phải là ID của user đã tồn tại trong hệ thống)
+        /// </summary>
         [Required]
         public string SenderId { get; set; } = string.Empty;
 
@@ -14,7 +17,7 @@ namespace BusinessObject.Dtos
         public string? Content { get; set; }
 
         /// <summary>
-        /// Loại tin nhắn: 0 = Text, 1 = Image, 2 = File
+        /// Loại tin nhắn: Text, Image, File
         /// </summary>
         public MessageType Type { get; set; } = MessageType.Text;
     }

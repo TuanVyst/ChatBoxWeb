@@ -53,6 +53,9 @@ namespace PresentationLayer.Controllers
             var savedMessage = await _chatService.SaveAndBroadcastMessageAsync(
                 dto.SenderId, dto.Content, dto.Type, null);
 
+            if (savedMessage == null)
+                return NotFound(new { message = $"Không tìm thấy user với SenderId: {dto.SenderId}" });
+
             var response = new MessageResponseDto
             {
                 Id = savedMessage.Id,
@@ -70,17 +73,23 @@ namespace PresentationLayer.Controllers
         /// <summary>
         /// Upload ảnh hoặc file kèm tin nhắn
         /// </summary>
-        /// <param name="senderId">ID người gửi</param>
+        /// <param name="senderId">ID người gửi (phải tồn tại trong hệ thống)</param>
         /// <param name="content">Nội dung text kèm theo (tùy chọn)</param>
-        /// <param name="type">Loại tin nhắn: 1 = Image, 2 = File</param>
         /// <param name="file">File upload</param>
         [HttpPost("upload")]
         public async Task<IActionResult> UploadFile(
             [FromForm] string senderId,
             [FromForm] string? content,
-            [FromForm] MessageType type,
             IFormFile file)
         {
+            if (string.IsNullOrWhiteSpace(senderId))
+                return BadRequest(new { message = "Vui lòng nhập SenderId" });
+
+            // Kiểm tra senderId có tồn tại trong hệ thống không
+            var userExists = await _chatService.UserExistsAsync(senderId);
+            if (!userExists)
+                return NotFound(new { message = $"Không tìm thấy user với SenderId: {senderId}" });
+
             if (file == null || file.Length == 0)
                 return BadRequest(new { message = "Vui lòng chọn file để upload" });
 
@@ -95,19 +104,15 @@ namespace PresentationLayer.Controllers
             if (!allowedExtensions.Contains(fileExtension))
                 return BadRequest(new { message = $"Định dạng file '{fileExtension}' không được hỗ trợ" });
 
-            // Tự động xác định MessageType dựa trên extension nếu chưa chỉ định đúng
+            // Tự động xác định MessageType dựa trên extension
             var imageExtensions = new[] { ".jpg", ".jpeg", ".png", ".gif", ".webp" };
-            if (imageExtensions.Contains(fileExtension))
-                type = MessageType.Image;
-            else
-                type = MessageType.File;
+            var type = imageExtensions.Contains(fileExtension) ? MessageType.Image : MessageType.File;
 
             // Lưu file vào wwwroot/uploads/
             var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads");
             if (!Directory.Exists(uploadsFolder))
                 Directory.CreateDirectory(uploadsFolder);
 
-            // Tạo tên file unique để tránh trùng
             var uniqueFileName = $"{Guid.NewGuid()}{fileExtension}";
             var filePath = Path.Combine(uploadsFolder, uniqueFileName);
 
@@ -116,12 +121,13 @@ namespace PresentationLayer.Controllers
                 await file.CopyToAsync(stream);
             }
 
-            // URL để truy cập file từ client
             var fileUrl = $"/uploads/{uniqueFileName}";
 
-            // Lưu message vào DB
             var savedMessage = await _chatService.SaveAndBroadcastMessageAsync(
                 senderId, content, type, fileUrl);
+
+            if (savedMessage == null)
+                return NotFound(new { message = $"Không tìm thấy user với SenderId: {senderId}" });
 
             var response = new MessageResponseDto
             {

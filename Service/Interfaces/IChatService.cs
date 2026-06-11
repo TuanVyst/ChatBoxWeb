@@ -6,13 +6,19 @@ namespace Service.Interfaces
     public interface IChatService
     {
         /// <summary>
-        /// Lưu tin nhắn mới vào DB và trả về message đã lưu (kèm thông tin Sender)
+        /// Lưu tin nhắn mới vào DB. Kiểm tra senderId tồn tại trước khi lưu.
         /// </summary>
-        Task<Message> SaveAndBroadcastMessageAsync(string senderId, string? content, MessageType type, string? fileUrl);
+        /// <returns>Message đã lưu, hoặc null nếu senderId không tồn tại</returns>
+        Task<Message?> SaveAndBroadcastMessageAsync(string senderId, string? content, MessageType type, string? fileUrl);
 
         /// <summary>
         /// Lấy 50 tin nhắn gần nhất
         /// </summary>
         Task<IEnumerable<Message>> GetChatHistoryAsync();
+
+        /// <summary>
+        /// Kiểm tra user có tồn tại trong hệ thống không
+        /// </summary>
+        Task<bool> UserExistsAsync(string userId);
     }
 }

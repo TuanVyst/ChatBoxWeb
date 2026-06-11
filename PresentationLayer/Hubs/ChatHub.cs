@@ -1,4 +1,4 @@
-﻿using BusinessObject.Enums;
+using BusinessObject.Enums;
 using Microsoft.AspNetCore.SignalR;
 using Service.Interfaces;
 
@@ -13,17 +13,20 @@ namespace PresentationLayer.Hubs
             _chatService = chatService;
         }
 
-        // Hàm này Frontend sẽ gọi để gửi tin nhắn
-        public async Task SendMessage(string senderId, string content, int messageType, string fileUrl)
+        // Frontend gọi hàm này để gửi tin nhắn qua SignalR
+        public async Task SendMessage(string senderId, string content, int messageType, string? fileUrl)
         {
-            // Ép kiểu từ int sang Enum MessageType
             var type = (MessageType)messageType;
 
-            // 1. Lưu tin nhắn vào Database thông qua Service
             var savedMessage = await _chatService.SaveAndBroadcastMessageAsync(senderId, content, type, fileUrl);
 
-            // 2. Phát tin nhắn vừa lưu đến TẤT CẢ client đang kết nối
-            // Frontend sẽ lắng nghe sự kiện "ReceiveMessage" này
+            if (savedMessage == null)
+            {
+                // Gửi lỗi về cho client nếu senderId không tồn tại
+                await Clients.Caller.SendAsync("Error", $"Không tìm thấy user với SenderId: {senderId}");
+                return;
+            }
+
             await Clients.All.SendAsync("ReceiveMessage", savedMessage);
         }
     }
