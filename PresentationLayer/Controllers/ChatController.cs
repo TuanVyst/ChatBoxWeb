@@ -1,6 +1,8 @@
 using BusinessObject.Dtos;
 using BusinessObject.Enums;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.SignalR;
+using PresentationLayer.Hubs;
 using Service.Interfaces;
 
 namespace PresentationLayer.Controllers
@@ -10,20 +12,18 @@ namespace PresentationLayer.Controllers
     public class ChatController : ControllerBase
     {
         private readonly IChatService _chatService;
+        private readonly IHubContext<ChatHub> _hubContext;
 
-        public ChatController(IChatService chatService)
+        public ChatController(IChatService chatService, IHubContext<ChatHub> hubContext)
         {
             _chatService = chatService;
+            _hubContext = hubContext;
         }
 
-        /// <summary>
-        /// Lấy lịch sử chat (50 tin nhắn gần nhất)
-        /// </summary>
         [HttpGet("history")]
         public async Task<IActionResult> GetChatHistory()
         {
             var messages = await _chatService.GetChatHistoryAsync();
-
             var response = messages.Select(m => new MessageResponseDto
             {
                 Id = m.Id,
@@ -34,13 +34,9 @@ namespace PresentationLayer.Controllers
                 FileUrl = m.FileUrl,
                 Timestamp = m.Timestamp
             });
-
             return Ok(response);
         }
 
-        /// <summary>
-        /// Gửi tin nhắn text
-        /// </summary>
         [HttpPost("send")]
         public async Task<IActionResult> SendMessage([FromBody] SendMessageDto dto)
         {
@@ -70,12 +66,6 @@ namespace PresentationLayer.Controllers
             return Ok(response);
         }
 
-        /// <summary>
-        /// Upload ảnh hoặc file kèm tin nhắn
-        /// </summary>
-        /// <param name="senderId">ID người gửi (phải tồn tại trong hệ thống)</param>
-        /// <param name="content">Nội dung text kèm theo (tùy chọn)</param>
-        /// <param name="file">File upload</param>
         [HttpPost("upload")]
         public async Task<IActionResult> UploadFile(
             [FromForm] string senderId,
@@ -85,7 +75,6 @@ namespace PresentationLayer.Controllers
             if (string.IsNullOrWhiteSpace(senderId))
                 return BadRequest(new { message = "Vui lòng nhập SenderId" });
 
-            // Kiểm tra senderId có tồn tại trong hệ thống không
             var userExists = await _chatService.UserExistsAsync(senderId);
             if (!userExists)
                 return NotFound(new { message = $"Không tìm thấy user với SenderId: {senderId}" });
@@ -93,22 +82,27 @@ namespace PresentationLayer.Controllers
             if (file == null || file.Length == 0)
                 return BadRequest(new { message = "Vui lòng chọn file để upload" });
 
-            // Giới hạn 10MB
-            const long maxFileSize = 10 * 1024 * 1024;
+            // 500MB limit
+            const long maxFileSize = 500L * 1024 * 1024;
             if (file.Length > maxFileSize)
-                return BadRequest(new { message = "File không được vượt quá 10MB" });
+                return BadRequest(new { message = "File không được vượt quá 500MB" });
 
-            // Kiểm tra định dạng file
-            var allowedExtensions = new[] { ".jpg", ".jpeg", ".png", ".gif", ".webp", ".pdf", ".doc", ".docx", ".xls", ".xlsx", ".zip", ".rar", ".txt" };
+            var allowedExtensions = new[]
+            {
+                ".jpg", ".jpeg", ".png", ".gif", ".webp", ".bmp", ".svg",
+                ".mp4", ".avi", ".mov", ".mkv", ".webm",
+                ".mp3", ".wav", ".ogg", ".flac", ".m4a",
+                ".pdf", ".doc", ".docx", ".xls", ".xlsx", ".ppt", ".pptx",
+                ".zip", ".rar", ".7z", ".tar", ".gz",
+                ".txt", ".csv", ".json", ".xml"
+            };
             var fileExtension = Path.GetExtension(file.FileName).ToLowerInvariant();
             if (!allowedExtensions.Contains(fileExtension))
                 return BadRequest(new { message = $"Định dạng file '{fileExtension}' không được hỗ trợ" });
 
-            // Tự động xác định MessageType dựa trên extension
-            var imageExtensions = new[] { ".jpg", ".jpeg", ".png", ".gif", ".webp" };
+            var imageExtensions = new[] { ".jpg", ".jpeg", ".png", ".gif", ".webp", ".bmp", ".svg" };
             var type = imageExtensions.Contains(fileExtension) ? MessageType.Image : MessageType.File;
 
-            // Lưu file vào wwwroot/uploads/
             var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads");
             if (!Directory.Exists(uploadsFolder))
                 Directory.CreateDirectory(uploadsFolder);
@@ -139,6 +133,9 @@ namespace PresentationLayer.Controllers
                 FileUrl = savedMessage.FileUrl,
                 Timestamp = savedMessage.Timestamp
             };
+
+            // Broadcast file message to all clients via SignalR
+            await _hubContext.Clients.All.SendAsync("ReceiveMessage", response);
 
             return Ok(response);
         }

@@ -9,6 +9,12 @@ using Service.Interfaces;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// === Kestrel: 500MB limit ===
+builder.WebHost.ConfigureKestrel(options =>
+{
+    options.Limits.MaxRequestBodySize = 500 * 1024 * 1024;
+});
+
 // === Database ===
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 builder.Services.AddDbContext<AppDbContext>(options =>

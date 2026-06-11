@@ -1,0 +1,121 @@
+.message-item {
+  display: flex;
+  gap: 12px;
+  padding: 2px 16px;
+  margin-top: 4px;
+}
+
+.message-item:hover {
+  background: #2E3035;
+}
+
+.message-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.message-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 2px;
+}
+
+.message-sender {
+  font-weight: 500;
+  font-size: 15px;
+  color: #F2F3F5;
+}
+
+.message-time {
+  font-size: 11px;
+  color: #949BA4;
+}
+
+.message-body {
+  font-size: 15px;
+  color: #DBDEE1;
+  line-height: 1.4;
+  word-wrap: break-word;
+}
+
+.message-image-link {
+  display: block;
+  margin-top: 6px;
+  max-width: 400px;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.message-image {
+  width: 100%;
+  height: auto;
+  display: block;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: opacity 0.15s;
+}
+
+.message-image:hover {
+  opacity: 0.9;
+}
+
+.message-file-box {
+  display: inline-flex;
+  align-items: center;
+  gap: 0;
+  margin-top: 6px;
+  background: #2B2D31;
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.message-file-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  text-decoration: none;
+  color: #B5BAC1;
+  font-size: 13px;
+  transition: background 0.15s;
+}
+
+.message-file-link:hover {
+  background: #35373C;
+  color: #F2F3F5;
+}
+
+.message-file-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 200px;
+}
+
+.message-file-download {
+  display: flex;
+  align-items: center;
+  padding: 8px 10px;
+  color: #B5BAC1;
+  text-decoration: none;
+  border-left: 1px solid #383A40;
+  transition: background 0.15s, color 0.15s;
+}
+
+.message-file-download:hover {
+  background: #35373C;
+  color: #F2F3F5;
+}
+
+.message-system-log {
+  display: flex;
+  justify-content: center;
+  padding: 4px 16px;
+}
+
+.message-system-log-text {
+  font-size: 13px;
+  color: #949BA4;
+  font-style: italic;
+}
