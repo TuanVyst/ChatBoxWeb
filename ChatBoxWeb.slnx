@@ -1,3 +1,7 @@
 <Solution>
+  <Project Path="BusinessObject/BusinessObject.csproj" />
+  <Project Path="DAL/DAL.csproj" />
   <Project Path="PresentationLayer/PresentationLayer.csproj" />
+  <Project Path="Repository/Repository.csproj" />
+  <Project Path="Service/Service.csproj" />
 </Solution>
