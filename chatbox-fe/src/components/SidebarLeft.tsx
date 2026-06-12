@@ -24,8 +24,10 @@ export default function SidebarLeft({ user, onlineUsers, connectionStatus, onLog
     setLoginError('');
     try {
       await onLogin(loginUsername.trim());
-    } catch {
-      setLoginError('Failed to connect. Is the server running?');
+    } catch (err) {
+      console.error('Login error:', err);
+      const msg = err instanceof Error ? err.message : String(err);
+      setLoginError(msg || 'Failed to connect. Is the server running?');
     } finally {
       setLoginLoading(false);
     }

@@ -1,7 +1,7 @@
 import { Message, User } from '../types';
 
-export const API_URL = 'https://localhost:7148';
-const BASE = `${API_URL}/api`;
+export const API_URL = '';
+const BASE = '/api';
 
 export async function loginUser(username: string): Promise<User> {
   const res = await fetch(`${BASE}/user/login`, {
