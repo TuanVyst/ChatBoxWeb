@@ -139,5 +139,33 @@ namespace PresentationLayer.Controllers
 
             return Ok(response);
         }
+
+        /// <summary>
+        /// Lấy danh sách emoji có sẵn
+        /// </summary>
+        [HttpGet("emojis")]
+        public IActionResult GetEmojis()
+        {
+            var emojis = new List<EmojiDto>
+    {
+        new() { Code = "😀", Name = "Grinning Face", Category = "Smileys" },
+        new() { Code = "😂", Name = "Face with Tears of Joy", Category = "Smileys" },
+        new() { Code = "😍", Name = "Heart Eyes", Category = "Smileys" },
+        new() { Code = "😭", Name = "Crying Face", Category = "Smileys" },
+        new() { Code = "😡", Name = "Angry Face", Category = "Smileys" },
+
+        new() { Code = "👍", Name = "Thumbs Up", Category = "Gestures" },
+        new() { Code = "👎", Name = "Thumbs Down", Category = "Gestures" },
+        new() { Code = "👏", Name = "Clapping Hands", Category = "Gestures" },
+        new() { Code = "🙏", Name = "Folded Hands", Category = "Gestures" },
+
+        new() { Code = "❤️", Name = "Red Heart", Category = "Love" },
+        new() { Code = "🔥", Name = "Fire", Category = "Symbols" },
+        new() { Code = "✅", Name = "Check", Category = "Symbols" },
+        new() { Code = "🎉", Name = "Party Popper", Category = "Symbols" }
+    };
+
+            return Ok(emojis);
+        }
     }
 }
