@@ -15,9 +15,10 @@ export interface Message {
 }
 
 export enum MessageType {
-  Text = 0,
-  Image = 1,
-  File = 2,
+  Text = 'Text',
+  Image = 'Image',
+  File = 'File',
+  Emoji = 'Emoji',
 }
 
 export interface OnlineUser {
