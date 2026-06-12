@@ -10,7 +10,7 @@ interface Props {
   currentUserId: string;
   connectionStatus: ConnectionStatus;
   onSend: (content: string) => void;
-  onUploadFile: (file: File) => Promise<void>;
+  onUploadFile: (file: File, content?: string) => Promise<void>;
   uploadProgress: UploadProgress | null;
   onCancelUpload?: () => void;
 }

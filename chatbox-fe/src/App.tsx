@@ -109,7 +109,7 @@ function App() {
     }
   };
 
-  const handleUploadFile = async (file: File) => {
+  const handleUploadFile = async (file: File, content?: string) => {
     if (!user) return;
 
     const controller = new AbortController();
@@ -117,7 +117,7 @@ function App() {
     setUploadProgress({ percent: 0, loaded: 0, total: file.size, speed: 0 });
 
     try {
-      const uploadedMessage = await uploadFile(user.id, file, undefined, (progress) => {
+      const uploadedMessage = await uploadFile(user.id, file, content, (progress) => {
         setUploadProgress(progress);
       }, controller.signal);
 

@@ -4,6 +4,12 @@ export interface User {
   createdAt: string;
 }
 
+export interface EmojiDto {
+  code: string;
+  name: string;
+  category: string;
+}
+
 export interface Message {
   id: string;
   senderId: string;

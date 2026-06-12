@@ -1,12 +1,12 @@
-import { useState, useRef } from 'react';
-import { ConnectionStatus } from '../types';
+import { useState, useRef, useEffect } from 'react';
+import { ConnectionStatus, EmojiDto } from '../types';
 import { UploadProgress } from '../services/api';
 import './ChatInput.css';
 
 interface Props {
   connectionStatus: ConnectionStatus;
   onSend: (content: string) => void;
-  onUploadFile: (file: File) => Promise<void>;
+  onUploadFile: (file: File, content?: string) => Promise<void>;
   uploadProgress: UploadProgress | null;
   onCancelUpload?: () => void;
 }
@@ -33,6 +33,58 @@ export default function ChatInput({ connectionStatus, onSend, onUploadFile, uplo
   const fileInputRef = useRef<HTMLInputElement>(null);
   const disabled = connectionStatus !== 'connected';
 
+  const emojiRef = useRef<HTMLDivElement>(null);
+  const [showEmojiPicker, setShowEmojiPicker] = useState(false);
+  const [emojis, setEmojis] = useState<EmojiDto[]>([]);
+
+  useEffect(() => {
+    if (showEmojiPicker && emojis.length === 0) {
+      fetch('/api/chat/emojis')
+        .then(res => {
+          if (!res.ok) throw new Error();
+          return res.json();
+        })
+        .then(setEmojis)
+        .catch(console.error);
+    }
+  }, [showEmojiPicker, emojis.length]);
+
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (emojiRef.current && !emojiRef.current.contains(event.target as Node)) {
+        setShowEmojiPicker(false);
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
+
+  const handleEmojiClick = (code: string) => {
+    const input = document.querySelector('.chat-input-field') as HTMLInputElement;
+    if (input) {
+      const start = input.selectionStart ?? text.length;
+      const end = input.selectionEnd ?? text.length;
+      const newText = text.substring(0, start) + code + text.substring(end);
+      setText(newText);
+      
+      const newCursorPos = start + code.length;
+      setTimeout(() => {
+        input.focus();
+        input.setSelectionRange(newCursorPos, newCursorPos);
+      }, 0);
+    } else {
+      setText(prev => prev + code);
+    }
+  };
+
+  const categories = emojis.reduce((acc, emoji) => {
+    if (!acc[emoji.category]) acc[emoji.category] = [];
+    acc[emoji.category].push(emoji);
+    return acc;
+  }, {} as Record<string, typeof emojis>);
+
   const handleSend = () => {
     if (disabled) return;
 
@@ -49,10 +101,12 @@ export default function ChatInput({ connectionStatus, onSend, onUploadFile, uplo
   const handleUpload = () => {
     if (!selectedFile) return;
     setError('');
-    onUploadFile(selectedFile).catch(e => {
+    const textToSend = text.trim();
+    onUploadFile(selectedFile, textToSend || undefined).catch(e => {
       setError(e instanceof Error ? e.message : 'Upload failed');
     });
     setSelectedFile(null);
+    setText('');
     if (preview) URL.revokeObjectURL(preview);
     setPreview(null);
     if (fileInputRef.current) fileInputRef.current.value = '';
@@ -180,14 +234,50 @@ export default function ChatInput({ connectionStatus, onSend, onUploadFile, uplo
           disabled={disabled}
           maxLength={2000}
         />
-        <button className="input-btn" disabled={disabled} title="Emoji">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <circle cx="12" cy="12" r="10" />
-            <path d="M8 14s1.5 2 4 2 4-2 4-2" />
-            <line x1="9" y1="9" x2="9.01" y2="9" />
-            <line x1="15" y1="9" x2="15.01" y2="9" />
-          </svg>
-        </button>
+        <div className="emoji-btn-wrapper" ref={emojiRef}>
+          <button
+            className={`input-btn ${showEmojiPicker ? 'active' : ''}`}
+            disabled={disabled}
+            title="Emoji"
+            onClick={() => setShowEmojiPicker(!showEmojiPicker)}
+          >
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <circle cx="12" cy="12" r="10" />
+              <path d="M8 14s1.5 2 4 2 4-2 4-2" />
+              <line x1="9" y1="9" x2="9.01" y2="9" />
+              <line x1="15" y1="9" x2="15.01" y2="9" />
+            </svg>
+          </button>
+          
+          {showEmojiPicker && (
+            <div className="emoji-picker-popover">
+              {Object.keys(categories).length === 0 ? (
+                <div className="emoji-picker-loading">Loading...</div>
+              ) : (
+                <div className="emoji-picker-scroll">
+                  {Object.keys(categories).map(catName => (
+                    <div key={catName} className="emoji-picker-cat">
+                      <div className="emoji-picker-cat-title">{catName}</div>
+                      <div className="emoji-picker-cat-grid">
+                        {categories[catName].map(emoji => (
+                          <button
+                            key={emoji.code}
+                            type="button"
+                            className="emoji-picker-item"
+                            title={emoji.name}
+                            onClick={() => handleEmojiClick(emoji.code)}
+                          >
+                            {emoji.code}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+        </div>
         <button
           className="send-btn"
           onClick={handleSend}
