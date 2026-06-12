@@ -1,4 +1,4 @@
-﻿using BusinessObject.Enums;
+using BusinessObject.Enums;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
@@ -28,6 +28,8 @@ namespace BusinessObject.Entities
 
         public string? FileUrl { get; set; } // Đường dẫn lưu trên server nếu Type là Image hoặc File
 
-        public DateTime Timestamp { get; set; } = DateTime.UtcNow; // Thời gian gửi tin (múi giờ UTC)
+        public string? OriginalFileName { get; set; } // Tên file gốc khi upload
+
+        public DateTime Timestamp { get; set; } = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time")); // Giờ Việt Nam (UTC+7)
     }
 }

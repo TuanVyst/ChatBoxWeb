@@ -1,11 +1,13 @@
 import { useState, useRef } from 'react';
 import { ConnectionStatus } from '../types';
+import { UploadProgress } from '../services/api';
 import './ChatInput.css';
 
 interface Props {
   connectionStatus: ConnectionStatus;
   onSend: (content: string) => void;
   onUploadFile: (file: File) => Promise<void>;
+  uploadProgress: UploadProgress | null;
 }
 
 const MAX_SIZE = 500 * 1024 * 1024;
@@ -16,7 +18,13 @@ function formatSize(bytes: number): string {
   return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
 }
 
-export default function ChatInput({ connectionStatus, onSend, onUploadFile }: Props) {
+function formatSpeed(bytesPerSec: number): string {
+  if (bytesPerSec < 1024) return bytesPerSec.toFixed(0) + ' B/s';
+  if (bytesPerSec < 1024 * 1024) return (bytesPerSec / 1024).toFixed(1) + ' KB/s';
+  return (bytesPerSec / (1024 * 1024)).toFixed(1) + ' MB/s';
+}
+
+export default function ChatInput({ connectionStatus, onSend, onUploadFile, uploadProgress }: Props) {
   const [text, setText] = useState('');
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
@@ -105,12 +113,35 @@ export default function ChatInput({ connectionStatus, onSend, onUploadFile }: Pr
             <span className="file-preview-name">{selectedFile.name}</span>
             <span className="file-preview-size">{formatSize(selectedFile.size)}</span>
           </div>
-          <button className="file-preview-remove" onClick={handleRemoveFile} title="Remove">
+          <button className="file-preview-remove" onClick={handleRemoveFile} title="Remove" disabled={uploading}>
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <line x1="18" y1="6" x2="6" y2="18" />
               <line x1="6" y1="6" x2="18" y2="18" />
             </svg>
           </button>
+        </div>
+      )}
+
+      {/* Upload Progress Bar */}
+      {uploadProgress && (
+        <div className="upload-progress-wrapper">
+          <div className="upload-progress-bar-bg">
+            <div
+              className="upload-progress-bar-fill"
+              style={{ width: `${uploadProgress.percent}%` }}
+            />
+          </div>
+          <div className="upload-progress-info">
+            <span className="upload-progress-percent">
+              {uploadProgress.percent}%
+            </span>
+            <span className="upload-progress-detail">
+              {formatSize(uploadProgress.loaded)} / {formatSize(uploadProgress.total)}
+            </span>
+            <span className="upload-progress-speed">
+              {formatSpeed(uploadProgress.speed)}
+            </span>
+          </div>
         </div>
       )}
 
@@ -172,3 +203,4 @@ export default function ChatInput({ connectionStatus, onSend, onUploadFile }: Pr
     </div>
   );
 }
+

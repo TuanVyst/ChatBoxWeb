@@ -9,7 +9,7 @@ namespace Service.Interfaces
         /// Lưu tin nhắn mới vào DB. Kiểm tra senderId tồn tại trước khi lưu.
         /// </summary>
         /// <returns>Message đã lưu, hoặc null nếu senderId không tồn tại</returns>
-        Task<Message?> SaveAndBroadcastMessageAsync(string senderId, string? content, MessageType type, string? fileUrl);
+        Task<Message?> SaveAndBroadcastMessageAsync(string senderId, string? content, MessageType type, string? fileUrl, string? originalFileName = null);
 
         /// <summary>
         /// Lấy 50 tin nhắn gần nhất

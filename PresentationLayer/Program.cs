@@ -25,7 +25,7 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowFrontend", policy =>
     {
-        policy.WithOrigins("http://localhost:3000") // Đổi port này theo port Frontend của bạn
+        policy.SetIsOriginAllowed(_ => true) // Cho phép mọi origin (LAN/Radmin VPN)
               .AllowAnyHeader()
               .AllowAnyMethod()
               .AllowCredentials(); // Bắt buộc khi dùng SignalR
@@ -39,7 +39,12 @@ builder.Services.AddScoped<IChatService, ChatService>();
 builder.Services.AddScoped<IUserService, UserService>();
 
 // === SignalR ===
-builder.Services.AddSignalR();
+builder.Services.AddSignalR()
+    .AddJsonProtocol(options =>
+    {
+        // Serialize enum dưới dạng string (giống Controllers) để Frontend nhận đúng type
+        options.PayloadSerializerOptions.Converters.Add(new System.Text.Json.Serialization.JsonStringEnumConverter());
+    });
 
 // === Controllers ===
 builder.Services.AddControllers()

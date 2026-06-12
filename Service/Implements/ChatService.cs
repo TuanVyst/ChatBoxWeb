@@ -16,7 +16,7 @@ namespace Service.Implements
             _userRepo = userRepo;
         }
 
-        public async Task<Message?> SaveAndBroadcastMessageAsync(string senderId, string? content, MessageType type, string? fileUrl)
+        public async Task<Message?> SaveAndBroadcastMessageAsync(string senderId, string? content, MessageType type, string? fileUrl, string? originalFileName = null)
         {
             // Kiểm tra senderId có tồn tại trong hệ thống không
             var user = await _userRepo.GetUserByIdAsync(senderId);
@@ -29,7 +29,8 @@ namespace Service.Implements
                 Content = content,
                 Type = type,
                 FileUrl = fileUrl,
-                Timestamp = DateTime.UtcNow
+                OriginalFileName = originalFileName,
+                Timestamp = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time"))
             };
 
             return await _messageRepo.AddMessageAsync(newMessage);

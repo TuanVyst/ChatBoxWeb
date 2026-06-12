@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Message, OnlineUser, ConnectionStatus, MessageType } from './types';
-import { loginUser, getChatHistory, uploadFile } from './services/api';
+import { loginUser, getChatHistory, uploadFile, UploadProgress } from './services/api';
 import { useSignalR } from './hooks/useSignalR';
 import SidebarLeft from './components/SidebarLeft';
 import ChatArea from './components/ChatArea';
@@ -17,6 +17,7 @@ function App() {
   const [onlineUsers, setOnlineUsers] = useState<OnlineUser[]>([]);
   const [connectionStatus, setConnectionStatus] =
     useState<ConnectionStatus>('disconnected');
+  const [uploadProgress, setUploadProgress] = useState<UploadProgress | null>(null);
 
   useEffect(() => {
     if (user) {
@@ -101,8 +102,12 @@ function App() {
   const handleUploadFile = async (file: File) => {
   if (!user) return;
 
+  setUploadProgress({ percent: 0, loaded: 0, total: file.size, speed: 0 });
+
   try {
-    const uploadedMessage = await uploadFile(user.id, file);
+    const uploadedMessage = await uploadFile(user.id, file, undefined, (progress) => {
+      setUploadProgress(progress);
+    });
 
     console.log('Uploaded message:', uploadedMessage);
 
@@ -116,6 +121,9 @@ function App() {
     setMessages(history);
   } catch (error) {
     console.error('Upload file failed:', error);
+  } finally {
+    // Giữ progress ở 100% một lát rồi ẩn
+    setTimeout(() => setUploadProgress(null), 1000);
   }
 };
   const fileMessages = messages.filter(
@@ -139,6 +147,7 @@ function App() {
         connectionStatus={connectionStatus}
         onSend={sendMessage}
         onUploadFile={handleUploadFile}
+        uploadProgress={uploadProgress}
       />
 
       <SidebarRight fileMessages={fileMessages} />
@@ -146,4 +155,4 @@ function App() {
   );
 }
 
-export default App;
+export default App;

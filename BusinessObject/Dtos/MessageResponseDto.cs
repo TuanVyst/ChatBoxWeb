@@ -10,6 +10,7 @@ namespace BusinessObject.Dtos
         public string? Content { get; set; }
         public MessageType Type { get; set; }
         public string? FileUrl { get; set; }
+        public string? OriginalFileName { get; set; }
         public DateTime Timestamp { get; set; }
     }
 }

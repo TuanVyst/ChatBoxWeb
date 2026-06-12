@@ -1,5 +1,6 @@
 import { useEffect, useRef } from 'react';
 import { Message, ConnectionStatus } from '../types';
+import { UploadProgress } from '../services/api';
 import MessageItem from './MessageItem';
 import ChatInput from './ChatInput';
 import './ChatArea.css';
@@ -10,9 +11,10 @@ interface Props {
   connectionStatus: ConnectionStatus;
   onSend: (content: string) => void;
   onUploadFile: (file: File) => Promise<void>;
+  uploadProgress: UploadProgress | null;
 }
 
-export default function ChatArea({ messages, currentUserId, connectionStatus, onSend, onUploadFile }: Props) {
+export default function ChatArea({ messages, currentUserId, connectionStatus, onSend, onUploadFile, uploadProgress }: Props) {
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -47,7 +49,9 @@ export default function ChatArea({ messages, currentUserId, connectionStatus, on
         connectionStatus={connectionStatus}
         onSend={onSend}
         onUploadFile={onUploadFile}
+        uploadProgress={uploadProgress}
       />
     </div>
   );
 }
+

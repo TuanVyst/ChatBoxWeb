@@ -87,6 +87,7 @@ namespace PresentationLayer.Hubs
                 Content = savedMessage.Content,
                 Type = savedMessage.Type,
                 FileUrl = savedMessage.FileUrl,
+                OriginalFileName = savedMessage.OriginalFileName,
                 Timestamp = savedMessage.Timestamp
             };
 

@@ -361,3 +361,9 @@ MigrationBackup/
 
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
+
+# Ignore uploaded files in PresentationLayer
+PresentationLayer/wwwroot/uploads/*
+
+# (Tùy chọn) Giữ lại thư mục uploads trống để tránh lỗi khi clone project mới
+!PresentationLayer/wwwroot/uploads/.gitkeep

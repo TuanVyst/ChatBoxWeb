@@ -32,6 +32,7 @@ namespace PresentationLayer.Controllers
                 Content = m.Content,
                 Type = m.Type,
                 FileUrl = m.FileUrl,
+                OriginalFileName = m.OriginalFileName,
                 Timestamp = m.Timestamp
             });
             return Ok(response);
@@ -60,6 +61,7 @@ namespace PresentationLayer.Controllers
                 Content = savedMessage.Content,
                 Type = savedMessage.Type,
                 FileUrl = savedMessage.FileUrl,
+                OriginalFileName = savedMessage.OriginalFileName,
                 Timestamp = savedMessage.Timestamp
             };
 
@@ -118,7 +120,7 @@ namespace PresentationLayer.Controllers
             var fileUrl = $"/uploads/{uniqueFileName}";
 
             var savedMessage = await _chatService.SaveAndBroadcastMessageAsync(
-                senderId, content, type, fileUrl);
+                senderId, content, type, fileUrl, file.FileName);
 
             if (savedMessage == null)
                 return NotFound(new { message = $"Không tìm thấy user với SenderId: {senderId}" });
@@ -131,6 +133,7 @@ namespace PresentationLayer.Controllers
                 Content = savedMessage.Content,
                 Type = savedMessage.Type,
                 FileUrl = savedMessage.FileUrl,
+                OriginalFileName = savedMessage.OriginalFileName,
                 Timestamp = savedMessage.Timestamp
             };
 

@@ -12,7 +12,11 @@ const SYSTEM_ID = '00000000-0000-0000-0000-000000000000';
 
 function formatTime(timestamp: string): string {
   const d = new Date(timestamp);
-  return d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  return d.toLocaleTimeString('vi-VN', {
+    hour: '2-digit',
+    minute: '2-digit',
+    timeZone: 'Asia/Ho_Chi_Minh',
+  });
 }
 
 function getFileUrl(fileUrl?: string | null): string {
@@ -85,7 +89,7 @@ export default function MessageItem({ message, isOwn }: Props) {
               </svg>
 
               <span className="message-file-name">
-                {message.fileUrl.split('/').pop()}
+                {message.originalFileName || message.fileUrl.split('/').pop()}
               </span>
             </a>
 

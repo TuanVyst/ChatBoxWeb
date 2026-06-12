@@ -11,6 +11,7 @@ export interface Message {
   content: string | null;
   type: MessageType;
   fileUrl: string | null;
+  originalFileName: string | null;
   timestamp: string;
 }
 
