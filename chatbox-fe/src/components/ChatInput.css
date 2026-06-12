@@ -228,3 +228,20 @@
   margin-left: auto;
   font-weight: 500;
 }
+
+.upload-progress-cancel {
+  background: none;
+  border: none;
+  color: #949BA4;
+  cursor: pointer;
+  padding: 2px;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  transition: color 0.15s, background-color 0.15s;
+}
+
+.upload-progress-cancel:hover {
+  color: #F23F42;
+  background: #35373C;
+}

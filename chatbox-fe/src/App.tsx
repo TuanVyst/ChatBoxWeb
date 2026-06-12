@@ -18,6 +18,7 @@ function App() {
   const [connectionStatus, setConnectionStatus] =
     useState<ConnectionStatus>('disconnected');
   const [uploadProgress, setUploadProgress] = useState<UploadProgress | null>(null);
+  const [abortController, setAbortController] = useState<AbortController | null>(null);
 
   useEffect(() => {
     if (user) {
@@ -43,6 +44,7 @@ function App() {
       content: `${username} disconnected`,
       type: MessageType.Text,
       fileUrl: null,
+      originalFileName: null,
       timestamp: new Date().toISOString(),
     };
 
@@ -99,33 +101,52 @@ function App() {
     setConnectionStatus('disconnected');
   };
 
+  const handleCancelUpload = () => {
+    if (abortController) {
+      abortController.abort();
+      setAbortController(null);
+      setUploadProgress(null);
+    }
+  };
+
   const handleUploadFile = async (file: File) => {
-  if (!user) return;
+    if (!user) return;
 
-  setUploadProgress({ percent: 0, loaded: 0, total: file.size, speed: 0 });
+    const controller = new AbortController();
+    setAbortController(controller);
+    setUploadProgress({ percent: 0, loaded: 0, total: file.size, speed: 0 });
 
-  try {
-    const uploadedMessage = await uploadFile(user.id, file, undefined, (progress) => {
-      setUploadProgress(progress);
-    });
+    try {
+      const uploadedMessage = await uploadFile(user.id, file, undefined, (progress) => {
+        setUploadProgress(progress);
+      }, controller.signal);
 
-    console.log('Uploaded message:', uploadedMessage);
+      console.log('Uploaded message:', uploadedMessage);
 
-    setMessages(prev =>
-      prev.some(m => m.id === uploadedMessage.id)
-        ? prev
-        : [...prev, uploadedMessage]
-    );
+      setMessages(prev =>
+        prev.some(m => m.id === uploadedMessage.id)
+          ? prev
+          : [...prev, uploadedMessage]
+      );
 
-    const history = await getChatHistory();
-    setMessages(history);
-  } catch (error) {
-    console.error('Upload file failed:', error);
-  } finally {
-    // Giữ progress ở 100% một lát rồi ẩn
-    setTimeout(() => setUploadProgress(null), 1000);
-  }
-};
+      const history = await getChatHistory();
+      setMessages(history);
+    } catch (error: any) {
+      if (error.message === 'Upload cancelled') {
+        console.log('Upload cancelled by user');
+      } else {
+        console.error('Upload file failed:', error);
+      }
+    } finally {
+      setAbortController(null);
+      if (controller.signal.aborted) {
+        setUploadProgress(null);
+      } else {
+        setTimeout(() => setUploadProgress(null), 1000);
+      }
+    }
+  };
+
   const fileMessages = messages.filter(
     m => m.type === MessageType.Image || m.type === MessageType.File
   );
@@ -148,6 +169,7 @@ function App() {
         onSend={sendMessage}
         onUploadFile={handleUploadFile}
         uploadProgress={uploadProgress}
+        onCancelUpload={handleCancelUpload}
       />
 
       <SidebarRight fileMessages={fileMessages} />

@@ -30,7 +30,8 @@ export async function uploadFile(
   senderId: string,
   file: File,
   content?: string,
-  onProgress?: (progress: UploadProgress) => void
+  onProgress?: (progress: UploadProgress) => void,
+  abortSignal?: AbortSignal
 ): Promise<Message> {
   const formData = new FormData();
   formData.append('senderId', senderId);
@@ -73,6 +74,16 @@ export async function uploadFile(
 
     xhr.addEventListener('error', () => reject(new Error('Network error')));
     xhr.addEventListener('abort', () => reject(new Error('Upload cancelled')));
+
+    if (abortSignal) {
+      if (abortSignal.aborted) {
+        xhr.abort();
+      } else {
+        abortSignal.addEventListener('abort', () => {
+          xhr.abort();
+        });
+      }
+    }
 
     xhr.open('POST', `${BASE}/chat/upload`);
     xhr.send(formData);

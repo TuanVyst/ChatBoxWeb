@@ -8,6 +8,7 @@ interface Props {
   onSend: (content: string) => void;
   onUploadFile: (file: File) => Promise<void>;
   uploadProgress: UploadProgress | null;
+  onCancelUpload?: () => void;
 }
 
 const MAX_SIZE = 500 * 1024 * 1024;
@@ -24,11 +25,10 @@ function formatSpeed(bytesPerSec: number): string {
   return (bytesPerSec / (1024 * 1024)).toFixed(1) + ' MB/s';
 }
 
-export default function ChatInput({ connectionStatus, onSend, onUploadFile, uploadProgress }: Props) {
+export default function ChatInput({ connectionStatus, onSend, onUploadFile, uploadProgress, onCancelUpload }: Props) {
   const [text, setText] = useState('');
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
-  const [uploading, setUploading] = useState(false);
   const [error, setError] = useState('');
   const fileInputRef = useRef<HTMLInputElement>(null);
   const disabled = connectionStatus !== 'connected';
@@ -46,19 +46,16 @@ export default function ChatInput({ connectionStatus, onSend, onUploadFile, uplo
     setText('');
   };
 
-  const handleUpload = async () => {
-    if (!selectedFile || uploading) return;
-    setUploading(true);
+  const handleUpload = () => {
+    if (!selectedFile) return;
     setError('');
-    try {
-      await onUploadFile(selectedFile);
-      setSelectedFile(null);
-      setPreview(null);
-    } catch (e) {
+    onUploadFile(selectedFile).catch(e => {
       setError(e instanceof Error ? e.message : 'Upload failed');
-    } finally {
-      setUploading(false);
-    }
+    });
+    setSelectedFile(null);
+    if (preview) URL.revokeObjectURL(preview);
+    setPreview(null);
+    if (fileInputRef.current) fileInputRef.current.value = '';
   };
 
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -113,7 +110,7 @@ export default function ChatInput({ connectionStatus, onSend, onUploadFile, uplo
             <span className="file-preview-name">{selectedFile.name}</span>
             <span className="file-preview-size">{formatSize(selectedFile.size)}</span>
           </div>
-          <button className="file-preview-remove" onClick={handleRemoveFile} title="Remove" disabled={uploading}>
+          <button className="file-preview-remove" onClick={handleRemoveFile} title="Remove">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <line x1="18" y1="6" x2="6" y2="18" />
               <line x1="6" y1="6" x2="18" y2="18" />
@@ -141,6 +138,14 @@ export default function ChatInput({ connectionStatus, onSend, onUploadFile, uplo
             <span className="upload-progress-speed">
               {formatSpeed(uploadProgress.speed)}
             </span>
+            {onCancelUpload && (
+              <button className="upload-progress-cancel" onClick={onCancelUpload} title="Cancel upload">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <line x1="18" y1="6" x2="6" y2="18" />
+                  <line x1="6" y1="6" x2="18" y2="18" />
+                </svg>
+              </button>
+            )}
           </div>
         </div>
       )}
@@ -150,7 +155,7 @@ export default function ChatInput({ connectionStatus, onSend, onUploadFile, uplo
       <div className="chat-input-bar">
         <button
           className="input-btn attach-btn"
-          disabled={disabled || uploading}
+          disabled={disabled || !!uploadProgress}
           title="Attach file (max 500MB)"
           onClick={() => fileInputRef.current?.click()}
         >
@@ -186,18 +191,12 @@ export default function ChatInput({ connectionStatus, onSend, onUploadFile, uplo
         <button
           className="send-btn"
           onClick={handleSend}
-          disabled={disabled || (!text.trim() && !selectedFile) || uploading}
+          disabled={disabled || (!text.trim() && !selectedFile)}
           title={selectedFile ? 'Upload' : 'Send'}
         >
-          {uploading ? (
-            <svg className="spin" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <path d="M21 12a9 9 0 1 1-6.219-8.56" />
-            </svg>
-          ) : (
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
-              <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z" />
-            </svg>
-          )}
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z" />
+          </svg>
         </button>
       </div>
     </div>

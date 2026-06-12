@@ -13,9 +13,13 @@ function getFileName(url: string): string {
 
 export default function SidebarRight({ fileMessages }: Props) {
   const [mediaExpanded, setMediaExpanded] = useState(true);
+  const [showAllImages, setShowAllImages] = useState(false);
 
-  const images = fileMessages.filter(m => m.type === MessageType.Image);
-  const docs = fileMessages.filter(m => m.type === MessageType.File);
+  const reversedFiles = [...fileMessages].reverse();
+  const images = reversedFiles.filter(m => m.type === MessageType.Image);
+  const docs = reversedFiles.filter(m => m.type === MessageType.File);
+
+  const visibleImages = showAllImages ? images : images.slice(0, 6);
 
   return (
     <div className="sidebar-right">
@@ -38,13 +42,22 @@ export default function SidebarRight({ fileMessages }: Props) {
                   <span className="media-category-count">{images.length}</span>
                 </div>
                 <div className="media-thumbnails">
-                  {images.slice(0, 6).map(msg => (
+                  {visibleImages.map(msg => (
                     <a key={msg.id} href={msg.fileUrl!} target="_blank" rel="noopener noreferrer" className="media-thumb">
                       <img src={msg.fileUrl!} alt="" />
                     </a>
                   ))}
-                  {images.length > 6 && <div className="media-more">+{images.length - 6}</div>}
+                  {images.length > 6 && !showAllImages && (
+                    <div className="media-more" onClick={() => setShowAllImages(true)}>
+                      +{images.length - 6}
+                    </div>
+                  )}
                 </div>
+                {showAllImages && (
+                  <div className="media-toggle-less" onClick={() => setShowAllImages(false)}>
+                    Show less
+                  </div>
+                )}
               </div>
             )}
 
@@ -59,7 +72,7 @@ export default function SidebarRight({ fileMessages }: Props) {
                   {docs.map(msg => (
                     <a key={msg.id} href={msg.fileUrl!} download className="media-doc-item">
                       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
-                      <span className="media-doc-name">{getFileName(msg.fileUrl!)}</span>
+                      <span className="media-doc-name">{msg.originalFileName || getFileName(msg.fileUrl!)}</span>
                     </a>
                   ))}
                 </div>

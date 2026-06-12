@@ -12,9 +12,10 @@ interface Props {
   onSend: (content: string) => void;
   onUploadFile: (file: File) => Promise<void>;
   uploadProgress: UploadProgress | null;
+  onCancelUpload?: () => void;
 }
 
-export default function ChatArea({ messages, currentUserId, connectionStatus, onSend, onUploadFile, uploadProgress }: Props) {
+export default function ChatArea({ messages, currentUserId, connectionStatus, onSend, onUploadFile, uploadProgress, onCancelUpload }: Props) {
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -50,6 +51,7 @@ export default function ChatArea({ messages, currentUserId, connectionStatus, on
         onSend={onSend}
         onUploadFile={onUploadFile}
         uploadProgress={uploadProgress}
+        onCancelUpload={onCancelUpload}
       />
     </div>
   );

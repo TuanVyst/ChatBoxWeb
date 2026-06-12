@@ -144,3 +144,18 @@
   color: #949BA4;
   font-size: 12px;
 }
+
+.media-toggle-less {
+  display: block;
+  text-align: right;
+  font-size: 11px;
+  color: #5865F2;
+  cursor: pointer;
+  padding: 4px 0;
+  transition: color 0.15s;
+}
+
+.media-toggle-less:hover {
+  text-decoration: underline;
+  color: #4752C4;
+}
