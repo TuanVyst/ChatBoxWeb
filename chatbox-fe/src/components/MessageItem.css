@@ -5,6 +5,18 @@
   margin-top: 4px;
 }
 
+.message-item.own {
+  flex-direction: row-reverse;
+}
+
+.message-item.own .message-header {
+  justify-content: flex-end;
+}
+
+.message-item.own .message-body {
+  text-align: right;
+}
+
 .message-item:hover {
   background: #2E3035;
 }
