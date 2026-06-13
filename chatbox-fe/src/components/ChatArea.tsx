@@ -13,8 +13,8 @@ interface Props {
   onUploadFile: (file: File, content?: string) => Promise<void>;
   uploadProgress: UploadProgress | null;
   onCancelUpload?: () => void;
-  showOnlineList: boolean;
-  setShowOnlineList: (show: boolean) => void;
+  showSidebarLeft: boolean;
+  setShowSidebarLeft: (show: boolean) => void;
   showMedia: boolean;
   setShowMedia: (show: boolean) => void;
 }
@@ -27,8 +27,8 @@ export default function ChatArea({
   onUploadFile,
   uploadProgress,
   onCancelUpload,
-  showOnlineList,
-  setShowOnlineList,
+  showSidebarLeft,
+  setShowSidebarLeft,
   showMedia,
   setShowMedia,
 }: Props) {
@@ -45,15 +45,13 @@ export default function ChatArea({
         {currentUserId && (
           <div className="chat-header-actions">
             <button
-              className={`header-toggle-btn ${showOnlineList ? 'active' : ''}`}
-              onClick={() => setShowOnlineList(!showOnlineList)}
-              title={showOnlineList ? "Ẩn danh sách online" : "Hiện danh sách online"}
+              className={`header-toggle-btn ${showSidebarLeft ? 'active' : ''}`}
+              onClick={() => setShowSidebarLeft(!showSidebarLeft)}
+              title={showSidebarLeft ? "Ẩn sidebar trái" : "Hiện sidebar trái"}
             >
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
-                <circle cx="9" cy="7" r="4" />
-                <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
-                <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+                <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
+                <line x1="9" y1="3" x2="9" y2="21" />
               </svg>
             </button>
             <button

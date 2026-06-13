@@ -19,7 +19,7 @@ function App() {
     useState<ConnectionStatus>('disconnected');
   const [uploadProgress, setUploadProgress] = useState<UploadProgress | null>(null);
   const [abortController, setAbortController] = useState<AbortController | null>(null);
-  const [showOnlineList, setShowOnlineList] = useState(true);
+  const [showSidebarLeft, setShowSidebarLeft] = useState(true);
   const [showMedia, setShowMedia] = useState(true);
 
   useEffect(() => {
@@ -155,15 +155,16 @@ function App() {
 
   return (
     <div className="app-layout">
-      <SidebarLeft
-        user={user}
-        onlineUsers={onlineUsers}
-        connectionStatus={connectionStatus}
-        onLogin={handleLogin}
-        onConnect={connect}
-        onLogout={handleLogout}
-        showOnlineList={showOnlineList}
-      />
+      {(!user || showSidebarLeft) && (
+        <SidebarLeft
+          user={user}
+          onlineUsers={onlineUsers}
+          connectionStatus={connectionStatus}
+          onLogin={handleLogin}
+          onConnect={connect}
+          onLogout={handleLogout}
+        />
+      )}
 
       <ChatArea
         messages={messages}
@@ -173,8 +174,8 @@ function App() {
         onUploadFile={handleUploadFile}
         uploadProgress={uploadProgress}
         onCancelUpload={handleCancelUpload}
-        showOnlineList={showOnlineList}
-        setShowOnlineList={setShowOnlineList}
+        showSidebarLeft={showSidebarLeft}
+        setShowSidebarLeft={setShowSidebarLeft}
         showMedia={showMedia}
         setShowMedia={setShowMedia}
       />
