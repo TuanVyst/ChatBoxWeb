@@ -10,9 +10,18 @@ interface Props {
   onLogin: (username: string) => Promise<void>;
   onConnect: () => void;
   onLogout: () => void;
+  showOnlineList?: boolean;
 }
 
-export default function SidebarLeft({ user, onlineUsers, connectionStatus, onLogin, onConnect, onLogout }: Props) {
+export default function SidebarLeft({
+  user,
+  onlineUsers,
+  connectionStatus,
+  onLogin,
+  onConnect,
+  onLogout,
+  showOnlineList = true,
+}: Props) {
   const [loginUsername, setLoginUsername] = useState('');
   const [loginLoading, setLoginLoading] = useState(false);
   const [loginError, setLoginError] = useState('');
@@ -82,27 +91,29 @@ export default function SidebarLeft({ user, onlineUsers, connectionStatus, onLog
         </div>
       </div>
 
-      <div className="online-section">
-        <div className="online-section-header">
-          Online — {onlineUsers.length}
+      {showOnlineList && (
+        <div className="online-section">
+          <div className="online-section-header">
+            Online — {onlineUsers.length}
+          </div>
+          <div className="online-list">
+            {currentUser && (
+              <div key={currentUser.userId} className="online-user-item">
+                <UserAvatar username={currentUser.username} size={24} />
+                <span className="online-user-name">{currentUser.username}</span>
+                <span className="online-dot" />
+              </div>
+            )}
+            {others.map(u => (
+              <div key={u.userId} className="online-user-item">
+                <UserAvatar username={u.username} size={24} />
+                <span className="online-user-name">{u.username}</span>
+                <span className="online-dot" />
+              </div>
+            ))}
+          </div>
         </div>
-        <div className="online-list">
-          {currentUser && (
-            <div key={currentUser.userId} className="online-user-item">
-              <UserAvatar username={currentUser.username} size={24} />
-              <span className="online-user-name">{currentUser.username}</span>
-              <span className="online-dot" />
-            </div>
-          )}
-          {others.map(u => (
-            <div key={u.userId} className="online-user-item">
-              <UserAvatar username={u.username} size={24} />
-              <span className="online-user-name">{u.username}</span>
-              <span className="online-dot" />
-            </div>
-          ))}
-        </div>
-      </div>
+      )}
 
       <div className="sidebar-footer">
         <div className="connection-status" onClick={connectionStatus === 'disconnected' ? onConnect : undefined}>

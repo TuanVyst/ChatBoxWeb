@@ -54,3 +54,36 @@
 .messages-empty p {
   font-size: 15px;
 }
+
+.chat-header-actions {
+  margin-left: auto;
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.header-toggle-btn {
+  background: none;
+  border: none;
+  color: #8E9297;
+  cursor: pointer;
+  padding: 6px;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s, color 0.15s;
+}
+
+.header-toggle-btn:hover {
+  background: #35373C;
+  color: #F2F3F5;
+}
+
+.header-toggle-btn.active {
+  color: #F2F3F5;
+}
+
+.header-toggle-btn.active:hover {
+  background: #35373C;
+}

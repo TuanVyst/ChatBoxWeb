@@ -19,6 +19,8 @@ function App() {
     useState<ConnectionStatus>('disconnected');
   const [uploadProgress, setUploadProgress] = useState<UploadProgress | null>(null);
   const [abortController, setAbortController] = useState<AbortController | null>(null);
+  const [showOnlineList, setShowOnlineList] = useState(true);
+  const [showMedia, setShowMedia] = useState(true);
 
   useEffect(() => {
     if (user) {
@@ -160,6 +162,7 @@ function App() {
         onLogin={handleLogin}
         onConnect={connect}
         onLogout={handleLogout}
+        showOnlineList={showOnlineList}
       />
 
       <ChatArea
@@ -170,9 +173,13 @@ function App() {
         onUploadFile={handleUploadFile}
         uploadProgress={uploadProgress}
         onCancelUpload={handleCancelUpload}
+        showOnlineList={showOnlineList}
+        setShowOnlineList={setShowOnlineList}
+        showMedia={showMedia}
+        setShowMedia={setShowMedia}
       />
 
-      <SidebarRight fileMessages={fileMessages} />
+      {showMedia && <SidebarRight fileMessages={fileMessages} />}
     </div>
   );
 }
